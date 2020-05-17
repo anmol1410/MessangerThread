@@ -2,27 +2,49 @@ package com.anmol.java;
 
 import java.io.Serializable;
 
+/**
+ * Message packets which are send across the Threads.
+ * <br>
+ * This has a linkedList of messages, <b>sorted</b> according to its <b>when</b>(when should it be procesed).
+ */
 public final class Message implements Serializable {
 
     private static final int FLAG_IN_USE = 1;
     private static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;
     private int flags;
 
-    private long when;
+    /**
+     * Time at which this message should be processed.
+     * This message will not be dispatched by the consumer before this time.
+     */
+    long when;
 
+    /**
+     * Actual data this message contains.
+     */
     private Object data;
 
+    /**
+     * Callback who can handle this message after its read by the consumer.
+     */
     private Runnable callback;
 
-    // sometimes we store linked lists of these things
-    /*package*/ Message next;
+    /**
+     * Linked list to maintain a pool of messages.
+     */
+    Message next;
 
     private static final Object sPoolSync = new Object();
-    private static Message sPool;
+    private static Message sPool; // Pool to avoid unnecessary object creations.
     private static int sPoolSize = 0;
 
     private static final int MAX_POOL_SIZE = 50;
 
+    /**
+     * Get the empty message which you can set data/callback on.
+     * <br>
+     * Private Constructor so that the message is always reused, and pulled from the pool.
+     */
     public static Message obtain() {
         synchronized (sPoolSync) {
             if (sPool != null) {
@@ -34,10 +56,13 @@ public final class Message implements Serializable {
                 return m;
             }
         }
-        return new Message();
+        return new Message(); // No message in the pool? Create a new one then.
     }
 
-    public static Message obtain(Message orig) {
+    /**
+     * Clones the Message.
+     */
+    public static Message obtain(final Message orig) {
         final Message m = obtain();
         m.callback = orig.callback;
         if (orig.data != null) {
@@ -46,6 +71,9 @@ public final class Message implements Serializable {
         return m;
     }
 
+    /**
+     * Recycle the message to avoid unnecessary object creations.
+     */
     public void recycle() {
         if (isInUse()) {
             throw new IllegalStateException("This message cannot be recycled because it is still in use.");
@@ -53,6 +81,11 @@ public final class Message implements Serializable {
         recycleUnchecked();
     }
 
+    /**
+     * Does not check if the message is currently being used. It recycles it anyways.
+     * <br>
+     * Useful when we want to clear the messages explicitly.
+     */
     void recycleUnchecked() {
         flags = FLAG_IN_USE;
         when = 0;
@@ -60,11 +93,10 @@ public final class Message implements Serializable {
         data = null;
 
         synchronized (sPoolSync) {
-            if (sPoolSize < MAX_POOL_SIZE) {
+            if (sPoolSize < MAX_POOL_SIZE)
                 next = sPool;
-                sPool = this;
-                sPoolSize++;
-            }
+            sPool = this;
+            sPoolSize++;
         }
     }
 
@@ -104,15 +136,14 @@ public final class Message implements Serializable {
         return this;
     }
 
-    public boolean isInUse() {
+    boolean isInUse() {
         return ((flags & FLAG_IN_USE) == FLAG_IN_USE);
     }
 
-    public void markInUse() {
+    void markInUse() {
         flags |= FLAG_IN_USE;
     }
 
     private Message() {
     }
-
 }
