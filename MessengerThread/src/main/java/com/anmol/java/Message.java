@@ -4,8 +4,9 @@ import java.io.Serializable;
 
 /**
  * Message packets which are send across the Threads.
- * <br>
- * This has a linkedList of messages, <b>sorted</b> according to its <b>when</b>(when should it be procesed).
+ * <br>This has a linkedList of messages, <b>sorted</b> according to its <b>when</b>(when should it be processed).
+ * <br> It can be created using {@link Message#obtain()} method, which ensures the message is pulled.added to to pool,
+ * and unnecessary Message Object creations can be avoided.
  */
 public final class Message implements Serializable {
 

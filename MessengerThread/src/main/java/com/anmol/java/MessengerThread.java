@@ -96,7 +96,8 @@ public abstract class MessengerThread extends Thread {
     // Write Operations
 
     /**
-     * Send the Runnable to the {@link MessengerThread}, which should be processed ASAP.
+     * Send the Runnable to the {@link MessengerThread}, which should be processed at the current time
+     * i.e. if no earlier msg is yet to be processed, it would be processed right away.
      * <br> Please note that the {@link MessengerThread} will call {@link Runnable#run()} method when it reads this msg from its queue.
      */
     public final boolean post(final Runnable runnable) {
@@ -120,23 +121,11 @@ public abstract class MessengerThread extends Thread {
     }
 
     /**
-     * Similar to {@link MessengerThread#post(Runnable)}. It sends the Runnable to the {@link MessengerThread}, which should be processed ASAP.
+     * It sends the Runnable to the {@link MessengerThread}, which should be processed which should be processed at the earliest.
      * <br> Please note that the {@link MessengerThread} will call {@link Runnable#run()} method when it reads this msg from its queue.
      */
     public final boolean postAtFrontOfQueue(final Runnable runnable) {
         return sendMessageAtFrontOfQueue(Message.obtain().withCallback(runnable));
-    }
-
-    /**
-     * Similar to {@link MessengerThread#post(Runnable)}. It sends the Runnable to the {@link MessengerThread}, which should be processed ASAP.
-     * <br> Please note that the {@link MessengerThread} will call {@link Runnable#run()} method when it reads this msg from its queue.
-     */
-    public final void removeCallbacks(final Runnable runnable) {
-        mQueue.removeMessages(runnable, null);
-    }
-
-    public final void removeCallbacks(final Runnable runnable, final Object token) {
-        mQueue.removeMessages(runnable, token);
     }
 
     /**
@@ -197,8 +186,7 @@ public abstract class MessengerThread extends Thread {
     }
 
     /**
-     * It sends the  {@link Message} to the {@link MessengerThread}, which should be processed ASAP..
-     * <br> It is similar to {@link MessengerThread#sendMessage(Message)}.
+     * It sends the  {@link Message} to the {@link MessengerThread}, which should be processed at first..
      * <br> Please note that the {@link MessengerThread} will send this message in {@link MessengerThread#onMessage(Message)} ()} method when it reads this msg from its queue.
      */
     public final boolean sendMessageAtFrontOfQueue(final Message msg) {
@@ -227,6 +215,20 @@ public abstract class MessengerThread extends Thread {
      */
     public final void removeMessages(final Object dataValue) {
         mQueue.removeMessages(dataValue);
+    }
+
+    /**
+     * Removes the messages with the provided Runnable.
+     */
+    public final void removeMessages(final Runnable runnable) {
+        mQueue.removeMessages(runnable, null);
+    }
+
+    /**
+     * Removes the messages with the matching Runnable and data.
+     */
+    public final void removeMessages(final Runnable runnable, final Object data) {
+        mQueue.removeMessages(runnable, data);
     }
 
     /**
