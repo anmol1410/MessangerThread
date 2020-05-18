@@ -4,7 +4,7 @@ package com.anmol.java;
  * The Queue of messages associated with every {@link MessengerThread}.
  */
 final class MessageQueue {
-    private Message mMessages; // All the messages(ts a linked list).
+    private Message mMessages; // All the messages(its a linked list).
     private boolean mStopping; // If queue is asked to stop.
 
     /**
@@ -49,10 +49,7 @@ final class MessageQueue {
                 removeAllMessagesLocked();
             }
 
-            // We can assume mPtr != 0 because mStopping was previously false.
             notifyAll();
-
-            mStopping = false;
         }
     }
 
@@ -72,6 +69,7 @@ final class MessageQueue {
 
         synchronized (this) {
             if (mStopping) {
+                // Do not add further msgs after the close is executed.
                 msg.recycle();
                 return false;
             }

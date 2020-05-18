@@ -3,17 +3,20 @@ package com.anmol.java;
 /**
  * The Messenger thread, which can accept {@link Message messages}/{@link Runnable runnables}.
  * <br>
- * It maintains a {@link MessageQueue}(every {@link MessengerThread} will have a queue each), and other threads can then send messages to {@link MessengerThread}, which will get enqueued to its {@link MessageQueue}.
+ * It maintains a {@link MessageQueue}(every {@link MessengerThread} will have a queue each),
+ * and other threads can then send messages to {@link MessengerThread}, which will get enqueued to its {@link MessageQueue}.
  * <br>
- * {@link MessageQueue} will store the messages in sorted order, sorting on the messages' <b>when</b>.
- * <br>Along with a queue, {@link MessengerThread} also has a consumer which keeps on reading from the queue(until stopped), and then dispatches the read msg to the callback onMessage/ or runs it if its a {@link Runnable}.
+ * {@link MessageQueue} will store the messages in sorted order, sorting on the messages' {@link Message#when}.
+ * <br>Along with a queue, {@link MessengerThread} also has a consumer which keeps reading from the queue(until stopped),
+ * and then dispatches the read {@link Message} to the callback {@link MessengerThread#onMessage}/ or runs it if its a {@link Runnable}.
  * <br>2 Types of messages can be written:
  * <ol>
  *     <li> {@link Message}: which upon read by the {@link Consumer}, will be handled in the {@link MessengerThread#onMessage} of the current thread.</li>
  *     <li> {@link Runnable}: which upon read by the {@link Consumer}, will run inside the current Thread.</li>
  * </ol>
  * <p>
- * Messages can we send when the sender thread has no idea how to process such messages,<br> and Runnable can be send to execute this code when its read by the target thread.
+ * Messages can be send when the sender thread wants to leave it to the target thread to act on the message,<br>
+ *     and Runnable can be send to execute this code when its read by the target thread.
  * <br>
  */
 public abstract class MessengerThread extends Thread {

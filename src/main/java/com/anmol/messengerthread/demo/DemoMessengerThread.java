@@ -13,6 +13,9 @@ public class DemoMessengerThread extends MessengerThread {
 
     @Override
     protected void onRun() {
+        if (threadToSendTo == null) {
+            return;
+        }
         // Option 1 : send Runnable which will be picked up by threadToSendTo and run by it.
         threadToSendTo.post(() -> System.out.println("Sent by " + getName() + ", and Received by: " + Thread.currentThread().getName()));
 
